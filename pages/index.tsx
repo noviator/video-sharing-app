@@ -3,6 +3,7 @@ import axios from 'axios'
 import {Video} from '../types' // import the type definition for the Video type
 import VideoCard from '../components/VideoCard'
 import NoResults from '../components/NoResults'
+import { BASE_URL } from '../utils'
 
 interface Iprops {
   videos: Video[]
@@ -11,7 +12,7 @@ interface Iprops {
 
 const Home = ({videos } : Iprops) => {
   // videos is of type Iprops (defined above)
-  console.log(videos)
+  // console.log(videos)
   return (
     <div className='flex flex-col gap-10 videos h-full'>
       {
@@ -27,13 +28,22 @@ const Home = ({videos } : Iprops) => {
 
 // fetch data in next.js
 // used to fetch new videos each time the page is loaded
-export const getServerSideProps = async () => {
-   const {data} = await axios.get('http://localhost:3000/api/post')
+export const getServerSideProps = async (
+  {query:{topic}} :
+  {query:{topic: string}}
+  ) => {
+    let response = null;
+
+    if(topic){
+      response = await axios.get(`${BASE_URL}/api/discover/${topic}`)
+    }else{
+      response = await axios.get(`${BASE_URL}/api/post`)
+    }
    
    // props gets automatically passed to the page (Home)  and can be accessed in the page using this.props.posts  
    return{
       props: {
-        videos: data
+        videos: response.data
       }
    }
 }
